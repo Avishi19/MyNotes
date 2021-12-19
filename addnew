@@ -1,0 +1,66 @@
+import 'package:flutter/material.dart';
+import 'package:notes/sql.dart';
+import 'main.dart';
+
+class AddNew extends StatefulWidget {
+  const AddNew({Key? key}) : super(key: key);
+
+  @override
+  _AddNewState createState() => _AddNewState();
+}
+
+class _AddNewState extends State<AddNew> {
+  TextEditingController _note = TextEditingController();
+  returnMonth(int month){
+    Map months = {1:'January',2:'February',3:'March',4:'April', 5:'May',6:'June',
+    7:'July',8:'August',9:'September',10:'October',11:'November',12:'December'};
+    return months[month];
+  }
+  returnDay(int day){
+    Map days = {1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday',7:'Sunday'};
+    return days[day];
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[350],
+      appBar: AppBar(
+        title: Text('Add Note'),
+        backgroundColor: Colors.black,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding:const EdgeInsets.symmetric(),
+            child: TextField(
+            controller: _note,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.all(10),
+              labelText: 'Add a New Note',
+              labelStyle: TextStyle(
+                  fontFamily: 'Handlee',fontSize: 20, color: Colors.black,
+
+              ),
+                hintText: 'Write Something...',
+                hintStyle: TextStyle(
+                  fontFamily: 'Handlee', fontSize: 15,
+                )
+            ),
+            maxLines: 10,
+          ),
+          ),
+          MaterialButton(onPressed: ()async{
+             String dateToday= (DateTime.now().day.toString()+'-'+returnMonth(DateTime.now().month)+'-'+ DateTime.now().year.toString());
+             String timeNow = (DateTime.now().hour.toString()+':'+DateTime.now().minute.toString());
+
+             Map<String,dynamic> variable1= {'date':dateToday,'time':timeNow,'day':returnDay(DateTime.now().weekday).toString(),'content':_note.text};
+             Navigator.pop(context,variable1);
+
+
+          },child: Text('Add',style: TextStyle(color: Colors.white),),color: Colors.black,shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),),
+
+        ],
+      )
+    );
+  }
+}
