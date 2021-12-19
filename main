@@ -1,0 +1,192 @@
+import 'package:flutter/material.dart';
+import 'package:notes/addnew.dart';
+import 'package:notes/sql.dart';
+import 'dart:async';
+
+void main(){
+  runApp(MaterialApp(
+    home: loading(),
+  ));
+}
+class loading extends StatefulWidget {
+  const loading({Key? key}) : super(key: key);
+  @override
+  _loadingState createState() => _loadingState();
+}
+
+class _loadingState extends State<loading> {
+  @override
+  void initState()
+  {
+    super.initState();
+    Timer(
+        Duration(seconds: 3),
+            ()=>Navigator.pushReplacement(
+            context, MaterialPageRoute(
+          builder: (context)=>Notes(),
+        )
+        )
+    );
+  }
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body:
+        Container(
+          decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                colors: <Color>[
+                  Color(0xFF1976D2),
+                  Color(0XFF455A64),
+                ],
+              )
+          ),
+          child: Center(
+            child: Text('MyNotes',style: TextStyle(fontSize: 30,fontFamily: 'Handlee',fontWeight: FontWeight.bold,color: Colors.grey[900]),textAlign: TextAlign.center,),
+          ),
+        )
+    );
+  }
+}
+
+class Notes extends StatefulWidget {
+  // const Notes({Key? key}) : super(key: key);
+
+  @override
+  _NotesState createState() => _NotesState();
+}
+
+ List data=[ ];
+
+class _NotesState extends State<Notes> {
+  void dataload()async{
+    data=await testing.instance.listAll();
+    setState(() {
+
+    });
+  }
+  void initState() {
+    super.initState();
+    dataload();
+  }
+   Future _createDialog(BuildContext context,int index){
+    return showDialog(context: context, builder: (context){
+      return AlertDialog(
+        title: Text('Do you want to delete?'),
+        actions: [
+          IconButton(onPressed: ()async{
+            await testing.instance.Delete(index);
+            dataload();
+            Navigator.of(context).pop();
+            setState(() {
+
+            });
+          },
+              icon: Icon(Icons.delete))
+
+        ],
+      );
+
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.blue[900],
+        title:
+            Text(
+              'My Notes',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontFamily: 'Handlee',fontSize: 24),
+            ),
+      ),
+
+     body:
+         Padding(
+           padding: const EdgeInsets.all(13),
+          child: data.length!=0?GridView(gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 1,
+            mainAxisSpacing: 10,
+        ),
+          children: [
+            for(int i=data.length-1;i>-1;i--)
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                    image: AssetImage("asset/image.png"),
+                    fit: BoxFit.cover
+                  ),
+                ),
+                child: InkWell(
+                  onLongPress: (){
+                    _createDialog(context,data[i]['id']);
+                  },
+                  child: Card(
+                    color: Colors.transparent,
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child:
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              NewText(textput: data[i]['date']),
+                              // SizedBox(width: MediaQuery.of(context).size.width*0.2,),
+                              NewText(textput: data[i]['time']),
+                              // SizedBox(width: MediaQuery.of(context).size.width*0.25,),
+                              NewText(textput: data[i]['day'],)
+                            ],
+                          ),
+                        ),
+                        Text(data[i]['content'],style: TextStyle(fontFamily: 'Handlee',fontSize: 18),)
+                      ],
+
+                    ),
+                  ),
+                ),
+              )
+             ]
+           ):Text('No Note, Add one now...',style: TextStyle(color: Colors.white,fontFamily: 'Handlee',fontSize: 24))
+         ),
+        floatingActionButton: Padding(
+        padding: const EdgeInsets.only(right: 10,bottom: 10),
+        child: FloatingActionButton(
+        onPressed:()async{
+          final result= await Navigator.push(context, MaterialPageRoute(builder: (context)=>const AddNew()));
+          await testing.instance.infoInsert(result);
+          data= await testing.instance.listAll();
+          dataload();
+          setState(() {
+
+          });
+          },
+
+    child: Icon(Icons.add, color: Colors.white),
+          backgroundColor: Colors.blueGrey[800],
+        ),
+      )
+    );
+  }
+}
+class NewText extends StatelessWidget {
+  // const NewText({Key? key}) : super(key: key);
+  String textput = ' ';
+  NewText({required this.textput});
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      textput,style: (
+      TextStyle(fontFamily: 'Handlee',fontSize: 17,fontWeight: FontWeight.bold)
+    ),
+    );
+  }
+}
+
+
+
